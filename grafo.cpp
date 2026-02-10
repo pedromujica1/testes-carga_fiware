@@ -1,3 +1,9 @@
+//Atividade Avaliativa 02 - Comparação de Dois Algoritmos de Caminho Mínimo
+//Alunos: Pedro Miotto Mujica e Ithony Elvis de Lima Avila
+//Arquivo: grafo.cpp
+//gcc g.c -o tsp -lm; ./tsp 'Entrada 10.txt
+//Objetivo: Implementar os algoirtmos Bellman-Ford e Djikistra par comparação de Dois Algoritmos de Caminho Mínimo
+
 #include<iostream>
 #include<stdlib.h>
 using namespace std;

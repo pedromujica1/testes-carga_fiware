@@ -1,9 +1,9 @@
-//Atividade Avaliativa 02 - Problema do Caixeiro Viajante
+//Atividade Avaliativa 02 - Comparação de Dois Algoritmos de Caminho Mínimo
 //Alunos: Pedro Miotto Mujica e Ithony Elvis de Lima Avila
-//Arquivo: pdg.c
-//gcc tsp.c -o tsp -lm; ./tsp 'Entrada 10.txt'
-//Objetivo: Implementar um algoritmo utilizando métodos de otimização para solucionar o problema do Caixeiro Viajante
-//Técnica de otimização utilizada: Recozimento Simulado
+//Arquivo: grafo.cpp
+//gcc g.c -o tsp -lm; ./tsp 'Entrada 10.txt
+//Objetivo: Implementar os algoirtmos Bellman-Ford e Djikistra par comparação de Dois Algoritmos de Caminho Mínimo
+
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
