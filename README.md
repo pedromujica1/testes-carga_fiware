@@ -1,4 +1,9 @@
 # grafos-caminhos-minimos
+int c = (vars.get("counter") ?: "0") as int
+c++
+vars.put("counter", c.toString())
+
+
 import java.util.*
 import java.nio.ByteBuffer
 import java.util.Base64
