@@ -5,12 +5,16 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="ThreadsLoraDevices">
-        <intProp name="ThreadGroup.num_threads">1</intProp>
-        <intProp name="ThreadGroup.ramp_time">1</intProp>
-        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <intProp name="ThreadGroup.num_threads">30</intProp>
+        <intProp name="ThreadGroup.ramp_time">20</intProp>
+        <longProp name="ThreadGroup.duration">60</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
           <intProp name="LoopController.loops">-1</intProp>
@@ -22,51 +26,54 @@
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
-          <stringProp name="script">import java.util.* 
-import java.nio.ByteBuffer 
-import java.util.Base64
+          <stringProp name="script">import java.util.Base64
+import java.util.Random
 
 def random = new Random()
-
 def payload = new ByteArrayOutputStream()
 
-// Campo A - Pressão 
-float pressure = 980 + random.nextFloat() * (1030 - 980) 
-int pressureLpp = (int)(pressure * 10) 
-payload.write([0x00, 0x73] as byte[]) 
-payload.write(ByteBuffer.allocate(2).putShort((short)pressureLpp).array())
+// A - Pressão (980..1030) em 0.1 hPa
+float pressure = 980 + random.nextFloat() * (1030 - 980)
+int pressureLpp = (int)(pressure * 10)
+payload.write(0x00); payload.write(0x73)
+payload.write((pressureLpp &gt;&gt; 8) &amp; 0xFF)
+payload.write(pressureLpp &amp; 0xFF)
 
-// Campo B - Temperatura 
-float temp = 20 + random.nextFloat() * (35 - 20) 
-int tempLpp = (int)(temp * 10) 
-payload.write([0x01, 0x67] as byte[]) 
-payload.write(ByteBuffer.allocate(2).putShort((short)tempLpp).array())
+// B - Temperatura (20..35) em 0.1 °C (signed)
+float temp = 20 + random.nextFloat() * (35 - 20)
+short tempLpp = (short)(temp * 10)
+payload.write(0x01); payload.write(0x67)
+payload.write((tempLpp &gt;&gt; 8) &amp; 0xFF)
+payload.write(tempLpp &amp; 0xFF)
 
-// Campo C - Umidade float 
-humidity = 30 + random.nextFloat() * (80 - 30) 
-int humidityLpp = (int)(humidity * 2) 
-payload.write([0x02, 0x68] as byte[]) 
-payload.write((byte)humidityLpp)
+// C - Umidade (30..80) em 0.5%
+float hum = 30 + random.nextFloat() * (80 - 30)
+int humLpp = (int)(hum * 2)
+payload.write(0x02); payload.write(0x68)
+payload.write(humLpp &amp; 0xFF)
 
-// Campo D fixo 
-payload.write([0x03, 0x00, 0x64] as byte[])
+// D fixo
+payload.write(0x03); payload.write(0x00); payload.write(0x64)
+// E fixo
+payload.write(0x04); payload.write(0x01); payload.write(0x00)
+// F fixo
+payload.write(0x05); payload.write(0x01); payload.write(0xD7)
 
-// Campo E fixo 
-payload.write([0x04, 0x01, 0x00] as byte[])
+def payloadBase64 = Base64.encoder.encodeToString(payload.toByteArray())
+vars.put(&quot;payload_raw&quot;, payloadBase64)
 
-// Campo F fixo 
-payload.write([0x05, 0x01, 0xD7] as byte[])
+//Device por thread
+def devId = &quot;myDevice0&quot;
+vars.put(&quot;dev_id&quot;, devId)
 
-def encoded = Base64.encoder.encodeToString(payload.toByteArray())
-
-vars.put(&quot;payload_raw&quot;, encoded) 
-vars.put(&quot;dev_id&quot;, &quot;myDevice${ctx.getThreadNum()}&quot;) 
-vars.put(&quot;counter&quot;, vars.get(&quot;counter&quot;) ?: &quot;0&quot;)</stringProp>
+//
+def serial = String.format(&quot;%016x&quot;, ctx.getThreadNum())
+vars.put(&quot;hardware_serial&quot;, serial)</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
         <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher">
-          <stringProp name="mqtt.broker.url">10.81.24.151:1883</stringProp>
+          <stringProp name="mqtt.broker.url">tcp://10.81.24.151:1883</stringProp>
           <stringProp name="mqtt.client.id"></stringProp>
           <stringProp name="mqtt.topic.name">v3/demoTTN/devices/${dev_id}/up</stringProp>
           <boolProp name="mqtt.message.retained">false</boolProp>
@@ -80,7 +87,7 @@ vars.put(&quot;counter&quot;, vars.get(&quot;counter&quot;) ?: &quot;0&quot;)</s
           <stringProp name="mqtt.message.input.value">{
   &quot;app_id&quot;: &quot;demoTTN&quot;,
   &quot;dev_id&quot;: &quot;${dev_id}&quot;,
-  &quot;hardware_serial&quot;: &quot;000000000000000&quot;,
+  &quot;hardware_serial&quot;: &quot;${hardware_serial}&quot;,
   &quot;port&quot;: 1,
   &quot;counter&quot;: ${__counter(TRUE)},
   &quot;is_retry&quot;: false,
@@ -94,15 +101,17 @@ vars.put(&quot;counter&quot;, vars.get(&quot;counter&quot;) ?: &quot;0&quot;)</s
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
-          <stringProp name="script">int c = (vars.get(&quot;counter&quot;) ?: &quot;0&quot;) as int 
-c++ 
-vars.put(&quot;counter&quot;, c.toString</stringProp>
+          <stringProp name="script">int c = (vars.get(&quot;counter&quot;) ?: &quot;0&quot;) as int
+c++
+vars.put(&quot;counter&quot;, c.toString())
+log.info(&quot;counter=&quot; + vars.get(&quot;counter&quot;))</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PostProcessor>
         <hashTree/>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
-          <stringProp name="ConstantTimer.delay">1000</stringProp>
-        </ConstantTimer>
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer">
+          <intProp name="calcMode">1</intProp>
+          <stringProp name="throughput">${__P(target_rpm,6000)}</stringProp>
+        </ConstantThroughputTimer>
         <hashTree/>
       </hashTree>
     </hashTree>
