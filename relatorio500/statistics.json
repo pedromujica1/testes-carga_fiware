@@ -1,0 +1,34 @@
+{
+  "MQTT Publisher" : {
+    "transaction" : "MQTT Publisher",
+    "sampleCount" : 29677,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 0.13616605452033553,
+    "medianResTime" : 0.0,
+    "minResTime" : 0.0,
+    "maxResTime" : 18.0,
+    "pct1ResTime" : 1.0,
+    "pct2ResTime" : 1.0,
+    "pct3ResTime" : 1.0,
+    "throughput" : 500.0168486318911,
+    "receivedKBytesPerSec" : 0.0,
+    "sentKBytesPerSec" : 0.0
+  },
+  "Total" : {
+    "transaction" : "Total",
+    "sampleCount" : 29677,
+    "errorCount" : 0,
+    "errorPct" : 0.0,
+    "meanResTime" : 0.13616605452033553,
+    "medianResTime" : 0.0,
+    "minResTime" : 0.0,
+    "maxResTime" : 18.0,
+    "pct1ResTime" : 1.0,
+    "pct2ResTime" : 1.0,
+    "pct3ResTime" : 1.0,
+    "throughput" : 500.0168486318911,
+    "receivedKBytesPerSec" : 0.0,
+    "sentKBytesPerSec" : 0.0
+  }
+}
