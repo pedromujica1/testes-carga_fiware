@@ -52,7 +52,7 @@ payload.write((tempLpp &gt;&gt; 8) &amp; 0xFF)
 payload.write(tempLpp &amp; 0xFF)
 
 //C - Umidade (aqui vai o contador)
-int humLpp = counter &amp; 0xFF   // garante 0–255
+int humLpp = (counter*2) &amp; 0xFF   // garante 0–255
 payload.write(0x02); payload.write(0x68)
 payload.write(humLpp)
 
