@@ -27,71 +27,56 @@
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="script">import java.util.Base64
+import java.util.Random
 
+def random = new Random()
 def payload = new ByteArrayOutputStream()
 
-// ------------------------------
-// Thread id e contador por thread
-// ------------------------------
-int threadNum = ctx.getThreadNum()  // 0..N-1
+int threadNum = ctx.getThreadNum()
 
 int seq = (vars.get(&quot;seq&quot;) ?: &quot;0&quot;) as int
 seq++
 vars.put(&quot;seq&quot;, seq.toString())
 
-// ------------------------------
-// A - Pressão = marca da thread (0x73 unsigned 2B)
-// pressureLpp representa 0.1 hPa
-// Ex: 1000.0 hPa + threadNum*0.1 -&gt; 10000 + threadNum
-// ------------------------------
-int pressureLpp = 10000 + threadNum   // 10000..10000+N
+// A - Pressão = thread (0x73, 0.1 hPa)
+int pressureLpp = 10000 + threadNum
 payload.write(0x00); payload.write(0x73)
 payload.write((pressureLpp &gt;&gt; 8) &amp; 0xFF)
 payload.write(pressureLpp &amp; 0xFF)
 
-// ------------------------------
-// B - Temperatura = seq (0x67 signed 2B)
-// tempLpp representa 0.1 °C
-// queremos que no banco apareça seq inteiro -&gt; manda seq*10
-// ------------------------------
-int tempLppInt = seq * 10
-short tempLpp = (short) tempLppInt
+// B - Temperatura normal
+float temp = 20 + random.nextFloat() * (35 - 20)
+short tempLpp = (short)(temp * 10)
 payload.write(0x01); payload.write(0x67)
 payload.write((tempLpp &gt;&gt; 8) &amp; 0xFF)
 payload.write(tempLpp &amp; 0xFF)
 
-// ------------------------------
-// C - Umidade pode ficar fixo ou real
-// (se quiser fixo = 50.0% =&gt; 100 no payload, pq 50*2)
-// ------------------------------
-int humLpp = 100
+// C - Umidade normal
+float hum = 30 + random.nextFloat() * (80 - 30)
+int humLpp = ((int)(hum * 2)) &amp; 0xFF
 payload.write(0x02); payload.write(0x68)
 payload.write(humLpp)
 
-// D fixo
+// CONTADOR request
+int counterLpp = (seq % 300) * 100
+short counter2B = (short) counterLpp
+
+payload.write(0x06); payload.write(0x02)
+payload.write((counter2B &gt;&gt; 8) &amp; 0xFF)
+payload.write(counter2B &amp; 0xFF)
+
+// fixos
 payload.write(0x03); payload.write(0x00); payload.write(0x64)
-// E fixo
 payload.write(0x04); payload.write(0x01); payload.write(0x00)
-// F fixo
 payload.write(0x05); payload.write(0x01); payload.write(0xD7)
 
 def payloadBase64 = Base64.encoder.encodeToString(payload.toByteArray())
+
 vars.put(&quot;payload_raw&quot;, payloadBase64)
-
-// Se quiser separar entidades por thread (recomendado p/ debug):
-// vars.put(&quot;dev_id&quot;, &quot;myDevice&quot; + threadNum)
 vars.put(&quot;dev_id&quot;, &quot;myDevice0&quot;)
-
 vars.put(&quot;hardware_serial&quot;, String.format(&quot;%016x&quot;, threadNum))
-vars.put(&quot;thread_num&quot;, threadNum.toString())
 
-log.info(
-    &quot;SEND | thread=&quot; + threadNum +
-    &quot; | seq=&quot; + seq +
-    &quot; | pressure(thread)=&quot; + pressureLpp +
-    &quot; | temperature(seq)=&quot; + seq +
-    &quot; | payload=&quot; + payloadBase64
-)</stringProp>
+log.info(&quot;SEND | thread=&quot;+threadNum+&quot; seq=&quot;+seq+&quot; counter=&quot;+(counterLpp/100)+&quot; payload=&quot;+payloadBase64)</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
