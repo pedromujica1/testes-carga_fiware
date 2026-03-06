@@ -58,12 +58,16 @@ payload.write(0x02); payload.write(0x68)
 payload.write(humLpp)
 
 // CONTADOR request
-int counterLpp = (seq % 300) * 100
-short counter2B = (short) counterLpp
+
+float counterLpp = seq
+int bits = Float.floatToIntBits(counterValue)
 
 payload.write(0x06); payload.write(0x02)
-payload.write((counter2B &gt;&gt; 8) &amp; 0xFF)
-payload.write(counter2B &amp; 0xFF)
+payload.write((bits &gt;&gt; 24) &amp; 0xFF)
+payload.write((bits &gt;&gt; 16) &amp; 0xFF)
+payload.write((bits &gt;&gt; 8) &amp; 0xFF)
+payload.write(bits &amp; 0xFF)
+
 
 // fixos
 payload.write(0x03); payload.write(0x00); payload.write(0x64)
