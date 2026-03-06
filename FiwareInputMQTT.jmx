@@ -10,7 +10,7 @@
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="FiwareInputMQTT">
-        <intProp name="ThreadGroup.num_threads">30</intProp>
+        <intProp name="ThreadGroup.num_threads">1</intProp>
         <intProp name="ThreadGroup.ramp_time">20</intProp>
         <longProp name="ThreadGroup.duration">60</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
@@ -80,7 +80,7 @@ log.info(&quot;SEND | thread=&quot;+threadNum+&quot; seq=&quot;+seq+&quot; count
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher">
+        <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher" enabled="true">
           <stringProp name="mqtt.broker.url">tcp://10.81.24.151:1883</stringProp>
           <stringProp name="mqtt.client.id"></stringProp>
           <stringProp name="mqtt.topic.name">v3/demoTTN/devices/${dev_id}/up</stringProp>
@@ -105,7 +105,7 @@ log.info(&quot;SEND | thread=&quot;+threadNum+&quot; seq=&quot;+seq+&quot; count
           <stringProp name="TestPlan.comments">Meu MQTT Writer</stringProp>
         </org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer">
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
           <intProp name="calcMode">1</intProp>
           <stringProp name="throughput">${__P(target_rpm,6000)}</stringProp>
         </ConstantThroughputTimer>
