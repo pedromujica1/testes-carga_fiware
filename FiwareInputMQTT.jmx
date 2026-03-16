@@ -11,7 +11,7 @@
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="FiwareInputMQTT">
         <intProp name="ThreadGroup.num_threads">1</intProp>
-        <intProp name="ThreadGroup.ramp_time">20</intProp>
+        <intProp name="ThreadGroup.ramp_time">1</intProp>
         <longProp name="ThreadGroup.duration">60</longProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
@@ -27,49 +27,36 @@
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="script">import java.util.Base64
-import java.util.Random
+import java.util.concurrent.ThreadLocalRandom
 
-def random = new Random()
+def random = ThreadLocalRandom.current()
 def payload = new ByteArrayOutputStream()
 
-int threadNum = ctx.getThreadNum()
-
-int seq = (vars.get(&quot;seq&quot;) ?: &quot;0&quot;) as int
+seq = (props.get(&quot;globalSeq&quot;) ?: &quot;0&quot;) as int
 seq++
-vars.put(&quot;seq&quot;, seq.toString())
+props.put(&quot;globalSeq&quot;, seq.toString())
 
-// A - Pressão = thread (0x73, 0.1 hPa)
-int pressureLpp = 10000 + threadNum
+
+//A- campo da pressao(contador)
+int pressureLpp = 9800 + seq
 payload.write(0x00); payload.write(0x73)
 payload.write((pressureLpp &gt;&gt; 8) &amp; 0xFF)
 payload.write(pressureLpp &amp; 0xFF)
 
-// B - Temperatura normal
-float temp = 20 + random.nextFloat() * (35 - 20)
+//B - Temperatura aleatória
+float temp = random.nextFloat(20f, 35f)
 short tempLpp = (short)(temp * 10)
 payload.write(0x01); payload.write(0x67)
 payload.write((tempLpp &gt;&gt; 8) &amp; 0xFF)
 payload.write(tempLpp &amp; 0xFF)
 
-// C - Umidade normal
-float hum = 30 + random.nextFloat() * (80 - 30)
-int humLpp = ((int)(hum * 2)) &amp; 0xFF
+//C - Umidade aleatória
+float hum = random.nextFloat(30f, 80f)
+int humLpp = (int)(hum * 2)
 payload.write(0x02); payload.write(0x68)
 payload.write(humLpp)
 
-// CONTADOR request
-
-float counterLpp = seq
-int bits = Float.floatToIntBits(counterValue)
-
-payload.write(0x06); payload.write(0x02)
-payload.write((bits &gt;&gt; 24) &amp; 0xFF)
-payload.write((bits &gt;&gt; 16) &amp; 0xFF)
-payload.write((bits &gt;&gt; 8) &amp; 0xFF)
-payload.write(bits &amp; 0xFF)
-
-
-// fixos
+//fixos
 payload.write(0x03); payload.write(0x00); payload.write(0x64)
 payload.write(0x04); payload.write(0x01); payload.write(0x00)
 payload.write(0x05); payload.write(0x01); payload.write(0xD7)
@@ -77,31 +64,29 @@ payload.write(0x05); payload.write(0x01); payload.write(0xD7)
 def payloadBase64 = Base64.encoder.encodeToString(payload.toByteArray())
 
 vars.put(&quot;payload_raw&quot;, payloadBase64)
-vars.put(&quot;dev_id&quot;, &quot;myDevice0&quot;)
-vars.put(&quot;hardware_serial&quot;, String.format(&quot;%016x&quot;, threadNum))
 
-log.info(&quot;SEND | thread=&quot;+threadNum+&quot; seq=&quot;+seq+&quot; counter=&quot;+(counterLpp/100)+&quot; payload=&quot;+payloadBase64)</stringProp>
+log.info(&quot;SEND seq=&quot;+seq+&quot; temp=&quot;+temp+&quot; hum=&quot;+hum+&quot; payload=&quot;+payloadBase64)</stringProp>
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher" enabled="true">
+        <org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler guiclass="org.apache.jmeter.protocol.mqtt.control.gui.MQTTPublisherGui" testclass="org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler" testname="MQTT Publisher">
           <stringProp name="mqtt.broker.url">tcp://10.81.24.151:1883</stringProp>
           <stringProp name="mqtt.client.id"></stringProp>
-          <stringProp name="mqtt.topic.name">v3/demoTTN/devices/${dev_id}/up</stringProp>
+          <stringProp name="mqtt.topic.name">v3/demoTTN/devices/myDevice/up</stringProp>
           <boolProp name="mqtt.message.retained">false</boolProp>
-          <boolProp name="mqtt.clean.session">false</boolProp>
+          <boolProp name="mqtt.clean.session">true</boolProp>
           <stringProp name="mqtt.keep.alive">0</stringProp>
           <stringProp name="mqtt.auth.username">admin</stringProp>
           <stringProp name="mqtt.auth.password">password</stringProp>
           <stringProp name="mqtt.qos">mqtt_at_most_once</stringProp>
-          <stringProp name="mqtt.client.type">mqtt_blocking_client</stringProp>
+          <stringProp name="mqtt.client.type">mqtt_async_client</stringProp>
           <stringProp name="mqtt.message.input.type">mqtt_message_input_type_text</stringProp>
           <stringProp name="mqtt.message.input.value">{
   &quot;app_id&quot;: &quot;demoTTN&quot;,
-  &quot;dev_id&quot;: &quot;${dev_id}&quot;,
-  &quot;hardware_serial&quot;: &quot;${hardware_serial}&quot;,
+  &quot;dev_id&quot;: &quot;myDevice&quot;,
+  &quot;hardware_serial&quot;: &quot;AAAA&quot;,
   &quot;port&quot;: 1,
-  &quot;counter&quot;: ${__counter(TRUE)},
+  &quot;counter&quot;: 2,
   &quot;is_retry&quot;: false,
   &quot;confirmed&quot;: false,
   &quot;payload_raw&quot;: &quot;${payload_raw}&quot;
@@ -109,7 +94,7 @@ log.info(&quot;SEND | thread=&quot;+threadNum+&quot; seq=&quot;+seq+&quot; count
           <stringProp name="TestPlan.comments">Meu MQTT Writer</stringProp>
         </org.apache.jmeter.protocol.mqtt.sampler.PublisherSampler>
         <hashTree/>
-        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer" enabled="true">
+        <ConstantThroughputTimer guiclass="TestBeanGUI" testclass="ConstantThroughputTimer" testname="Constant Throughput Timer">
           <intProp name="calcMode">1</intProp>
           <stringProp name="throughput">${__P(target_rpm,6000)}</stringProp>
         </ConstantThroughputTimer>
