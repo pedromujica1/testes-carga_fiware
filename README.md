@@ -1,10 +1,5 @@
 # TESTES DE CARGA FIWARE
 
-
-
-#execução antiga
-./jmeter -n -t SimplesThreadsLoraDevices.jmx -l resultado.jtl -e -o relatorio
-
 #execução nova
 #100 rps
 ./jmeter -n -t FiwareInputMQTT.jmx -l relatorio100.jtl -e -o relatorio100 -Jtarget_rpm=6000
