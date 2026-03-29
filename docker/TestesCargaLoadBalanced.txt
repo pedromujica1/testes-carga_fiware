@@ -1,0 +1,195 @@
+FIWARE- Testes de Carga com Load Balencer
+
+====== 50 RPS =========
+ count 
+-------
+ 11904
+(1 row)
+
+ count 
+-------
+ 11884
+(1 row)
+
+ count 
+-------
+ 11876
+(1 row)
+
+ count 
+-------
+ 11884
+(1 row)
+ count 
+-------
+ 11896
+(1 row)
+
+
+====== 100 RPS =========
+ count 
+-------
+ 23640
+(1 row)
+
+ count 
+-------
+ 23660
+(1 row)
+
+ count 
+-------
+ 23668
+(1 row)
+
+ count 
+-------
+ 23684
+(1 row)
+
+ count 
+-------
+ 23688
+(1 row)
+
+
+======200 RPS=============
+ count 
+-------
+ 47200
+(1 row)
+
+ count 
+-------
+ 47228
+(1 row)
+
+ count 
+-------
+ 47084
+(1 row)
+
+ count 
+-------
+ 47028
+(1 row)
+
+ count 
+-------
+ 47144
+(1 row)
+
+
+======300 RPS=============
+ count 
+-------
+ 70788
+(1 row)
+
+ count 
+-------
+ 70712
+(1 row)
+
+ count 
+-------
+ 70704
+(1 row)
+
+ count 
+-------
+ 70716
+(1 row)
+
+ count 
+-------
+ 70652
+(1 row)
+
+
+======400 RPS=============
+
+ count 
+-------
+ 87876
+(1 row)
+
+ count 
+-------
+ 86480
+(1 row)
+
+ count 
+-------
+ 85164
+(1 row)
+
+ count 
+-------
+ 86324
+(1 row)
+
+ count 
+-------
+ 85608
+(1 row)
+
+
+=====500 RPS=============
+postgres=# select count(*)  from openiot.airquality_weatherobserved_mydevice_weatherobserved;
+ count  
+--------
+ 117704
+(1 row)
+
+ count  
+--------
+ 117420
+(1 row)
+ count  
+--------
+ 117652
+(1 row)
+
+ count  
+--------
+ 117676
+(1 row)
+
+ count  
+--------
+ 117588
+(1 row)
+
+
+======1000 RPS=============
+
+ count  
+--------
+ 201744
+(1 row)
+
+ count  
+--------
+ 204596
+(1 row)
+
+ count  
+--------
+ 199220
+(1 row)
+
+ count  
+--------
+ 204896
+(1 row)
+
+ count  
+--------
+ 204084
+(1 row)
+
+
+
+
+
